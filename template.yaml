@@ -1,0 +1,221 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Backend serverless para Cromos del Mundial
+
+Parameters:
+  StageName:
+    Type: String
+    Default: dev
+
+Globals:
+  Function:
+    Runtime: nodejs24.x
+    Timeout: 10
+    MemorySize: 128
+    CodeUri: .
+
+Resources:
+  CromosRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: cromos-backend-rest-api
+      StageName: !Ref StageName
+      Cors:
+        AllowOrigin: "'*'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+
+  RootFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/LabRole"
+      FunctionName: cromos-backend-root
+      Handler: src/handlers/root.lambdaHandler
+      Events:
+        RootGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /
+            Method: GET
+
+  HealthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: cromos-backend-health
+      Handler: src/handlers/health.lambdaHandler
+      Environment:
+        Variables:
+          DOMAIN_NAME: health
+      Events:
+        HealthGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /health
+            Method: GET
+        HealthOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /health
+            Method: OPTIONS
+
+  CountriesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: cromos-backend-countries
+      Handler: src/handlers/countries.lambdaHandler
+      Environment:
+        Variables:
+          DOMAIN_NAME: countries
+      Events:
+        CountriesList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /countries
+            Method: GET
+        CountriesById:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /countries/{id}
+            Method: GET
+        CountriesOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /countries
+            Method: OPTIONS
+        CountriesByIdOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /countries/{id}
+            Method: OPTIONS
+
+  TeamsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: cromos-backend-teams
+      Handler: src/handlers/teams.lambdaHandler
+      Environment:
+        Variables:
+          DOMAIN_NAME: teams
+      Events:
+        TeamsList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /teams
+            Method: GET
+        TeamsById:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /teams/{id}
+            Method: GET
+        TeamsOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /teams
+            Method: OPTIONS
+        TeamsByIdOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /teams/{id}
+            Method: OPTIONS
+
+  PlayersFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: cromos-backend-players
+      Handler: src/handlers/players.lambdaHandler
+      Environment:
+        Variables:
+          DOMAIN_NAME: players
+      Events:
+        PlayersList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /players
+            Method: GET
+        PlayersById:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /players/{id}
+            Method: GET
+        PlayersOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /players
+            Method: OPTIONS
+        PlayersByIdOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /players/{id}
+            Method: OPTIONS
+
+  StickersFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: cromos-backend-stickers
+      Handler: src/handlers/stickers.lambdaHandler
+      Environment:
+        Variables:
+          DOMAIN_NAME: stickers
+      Events:
+        StickersList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /stickers
+            Method: GET
+        StickersCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /stickers
+            Method: POST
+        StickersById:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /stickers/{id}
+            Method: GET
+        StickersUpdate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /stickers/{id}
+            Method: PUT
+        StickersDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /stickers/{id}
+            Method: DELETE
+        StickersOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /stickers
+            Method: OPTIONS
+        StickersByIdOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CromosRestApi
+            Path: /stickers/{id}
+            Method: OPTIONS
+
+Outputs:
+  RestApiUrl:
+    Description: URL base del API Gateway REST compatible con Learner Lab
+    Value: !Sub "https://${CromosRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}"

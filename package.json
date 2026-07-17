@@ -1,0 +1,22 @@
+{
+  "name": "cromos-backend-cloud-demo",
+  "version": "1.0.0",
+  "description": "Backend serverless introductorio para Cromos del Mundial Cloud Edition",
+  "main": "src/handlers/root.js",
+  "scripts": {
+    "start:local": "node src/local-server.js",
+    "smoke": "node scripts/smoke.js"
+  },
+  "keywords": [
+    "aws",
+    "sam",
+    "lambda",
+    "api-gateway",
+    "serverless"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  }
+}
